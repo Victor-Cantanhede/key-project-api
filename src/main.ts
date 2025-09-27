@@ -25,4 +25,6 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap().catch((err) => console.error(err));
+bootstrap()
+  .then(() => console.log(`Server running in ${ process.env.NODE_ENV }`))
+  .catch((err) => console.error(err));
