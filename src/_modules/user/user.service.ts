@@ -11,112 +11,89 @@ import { AppDatabase, DbUserType } from 'src/infrastructure/database/AppDatabase
 @Injectable()
 export class UserService implements IUserService {
 
-    constructor(private _db: AppDatabase) {}
+    constructor(private readonly _db: AppDatabase) {}
 
 
     //##############################################################
     // CREATE USER
     //##############################################################
     async createUser(dto: CreateUserDto): Promise<GetUserDto> {
-        try {
-            const newUser = new CreateUserDto(
-                dto.name.toUpperCase(),
-                dto.email,
-                dto.password
-            );
 
-            const existingUser = await this._db.user.findUnique({ where: { email: newUser.email } });
+        const newUser = new CreateUserDto(
+            dto.name.toUpperCase(),
+            dto.email,
+            dto.password
+        );
 
-            if (existingUser) {
-                throw new ConflictException('User with this email already exists');
-            }
+        const existingUser = await this._db.user.findUnique({ where: { email: newUser.email } });
 
-            const hashedPassword = await bcrypt.hash(newUser.password, 10);
-            newUser.password = hashedPassword;
-
-            const createdUser: DbUserType = await this._db.user.create({ data: newUser });
-            return new GetUserDto(createdUser);
-
-        } catch (error) {
-            throw new ConflictException(`Failed to create user: ${error.message || 'Unknown error'}`);
+        if (existingUser) {
+            throw new ConflictException('User with this email already exists');
         }
+
+        const hashedPassword = await bcrypt.hash(newUser.password, 10);
+        newUser.password = hashedPassword;
+
+        const createdUser: DbUserType = await this._db.user.create({ data: newUser });
+        return new GetUserDto(createdUser);
     }
 
     //##############################################################
     // GET ALL USERS
     //##############################################################
     async getAllUsers(): Promise<Array<GetUserDto | null>> {
-        try {
-            const users: Array<DbUserType | null> = await this._db.user.findMany();
-            return users.map(user => user ? new GetUserDto(user) : null);
-            
-        } catch (error) {
-            throw new ConflictException(`Failed to get users: ${error.message || 'Unknown error'}`);
-        }
+
+        const users: Array<DbUserType | null> = await this._db.user.findMany();
+        return users.map(user => user ? new GetUserDto(user) : null);
     }
 
     //##############################################################
     // GET USER BY ID
     //##############################################################
     async getUserById(id: string): Promise<GetUserDto> {
-        try {
-            const userId = parseInt(id);
-            const user = await this._db.user.findUnique({ where: { id: userId } });
 
-            if (!user) {
-                throw new ConflictException('User not found');
-            }
-            return new GetUserDto(user);
+        const userId = parseInt(id);
+        const user = await this._db.user.findUnique({ where: { id: userId } });
 
-        } catch (error) {
-            throw new ConflictException(`Failed to get user: ${error.message || 'Unknown error'}`);
+        if (!user) {
+            throw new ConflictException('User not found');
         }
+        return new GetUserDto(user);
     }
 
     //##############################################################
     // UPDATE USER BY ID
     //##############################################################
     async updateUserById(id: string, dto: UpdateUserDto): Promise<GetUserDto> {
-        try {
-            const userId = parseInt(id);
-            const existingUser = await this._db.user.findUnique({ where: { id: userId } });
 
-            if (!existingUser) {
-                throw new ConflictException('User not found');
-            }
+        const user = await this.getUserById(id);
+        const newUserData = new UpdateUserDto(dto);           
 
-            const newUserData = new UpdateUserDto({ ...dto });           
-
-            if (newUserData.password) {
-                const hashedPassword = await bcrypt.hash(newUserData.password, 10);
-                newUserData.password = hashedPassword;
-            }
-
-            const updatedUser: DbUserType = await this._db.user.update({ where: { id: userId }, data: newUserData });
-            return new GetUserDto(updatedUser);
-
-        } catch (error) {
-            throw new ConflictException(`Failed to update user: ${error.message || 'Unknown error'}`);
+        if (newUserData.password) {
+            const hashedPassword = await bcrypt.hash(newUserData.password, 10);
+            newUserData.password = hashedPassword;
         }
+
+        const updatedUser: DbUserType = await this._db.user.update({ where: { id: user.id }, data: newUserData });
+        return new GetUserDto(updatedUser);
     }
 
     //##############################################################
     // DELETE USER BY ID
     //##############################################################
     async deleteUserById(id: string): Promise<GetUserDto> {
-        try {
-            const userId = parseInt(id);
-            const existingUser = await this._db.user.findUnique({ where: { id: userId } });
-            
-            if (!existingUser) {
-                throw new ConflictException('User not found or already deleted');
-            }
+        
+        const user = await this.getUserById(id);
+        const deletedUser: DbUserType = await this._db.user.delete({ where: { id: user.id } });
 
-            const deletedUser: DbUserType = await this._db.user.delete({ where: { id: userId } });
-            return new GetUserDto(deletedUser);
+        return new GetUserDto(deletedUser);
+    }
 
-        } catch (error) {
-            throw new ConflictException(`Failed to delete user: ${error.message || 'Unknown error'}`);
-        }
+    //##############################################################
+    // VERIFY USER BY ID
+    // This method is only used to verify if a user exists by ID without returning the user data
+    //##############################################################
+    async verifyUserById(userId: string): Promise<void> {
+        await this.getUserById(userId);
     }
 }

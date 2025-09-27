@@ -16,13 +16,13 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  accessKeys AccessKey[]
+  accessKeys Key[]
 }
 
-model AccessKey {
+model Key {
   id          Int      @id @default(autoincrement())
-  username    String
-  key         String
+  name        String
+  keyvalue    String
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
