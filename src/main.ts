@@ -1,11 +1,15 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AppModule } from './app.module';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
+
   const app = await NestFactory.create(AppModule);
+
   app.useGlobalPipes(new ValidationPipe());
+  app.use(cookieParser());
 
   // Swagger config
   const swaggerConfig = new DocumentBuilder()
@@ -26,5 +30,5 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap()
-  .then(() => console.log(`Server running in ${ process.env.NODE_ENV }`))
+  .then(() => console.log(`Server running in ${ process.env.NODE_ENV } => PORT ${ process.env.PORT }`))
   .catch((err) => console.error(err));

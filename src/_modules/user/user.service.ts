@@ -67,7 +67,7 @@ export class UserService implements IUserService {
     async updateUserById(id: string, dto: UpdateUserDto): Promise<GetUserDto> {
 
         const user = await this.getUserById(id);
-        const newUserData = new UpdateUserDto(dto);           
+        const newUserData = new UpdateUserDto(dto);
 
         if (newUserData.password) {
             const hashedPassword = await bcrypt.hash(newUserData.password, 10);

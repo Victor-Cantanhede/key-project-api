@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 
 import { AppDatabase, DbUserType } from 'src/infrastructure/database/AppDatabase';
 import { AuthUserResponseDto } from './dtos/AuthUserResponseDto';
-import { GetUserDto } from '../user/dtos/GetUserDto';
+import { PayloadUserTokenDto } from './dtos/PayloadTokenDto';
 
 
 @Injectable()
@@ -31,7 +31,11 @@ export class AuthService {
             throw new ConflictException('Invalid password');
         }
         
-        const payload = { sub: user.id, email: user.email };
+        const payload: PayloadUserTokenDto = {
+            id: user.id.toString(),
+            email: user.email
+        };
+
         const token = await this._jwtService.signAsync(payload);
 
         return new AuthUserResponseDto(user, token);

@@ -6,13 +6,14 @@ import { AuthService } from './auth.service';
 import { AppDatabase } from 'src/infrastructure/database/AppDatabase';
 
 @Module({
-    controllers: [AuthController],
-    providers: [AuthService, AppDatabase],
+    exports: [AuthService, JwtModule],
     imports: [
         JwtModule.register({
             secret: process.env.JWT_SECRET,
             signOptions: { expiresIn: '10m' },
         })
-    ]
+    ],
+    controllers: [AuthController],
+    providers: [AuthService, AppDatabase]
 })
 export class AuthModule {}
