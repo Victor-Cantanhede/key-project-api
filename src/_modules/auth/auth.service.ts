@@ -21,7 +21,7 @@ export class AuthService {
     //##############################################################
     async authenticateUser(email: string, password: string): Promise<AuthUserResponseDto> {
 
-        const user = await this._db.user.findUnique({ where: { email } });
+        const user: DbUserType | null = await this._db.user.findUnique({ where: { email } });
         if (!user) {
             throw new ConflictException('User not registered or invalid email');
         }
@@ -33,7 +33,8 @@ export class AuthService {
         
         const payload: PayloadUserTokenDto = {
             id: user.id.toString(),
-            email: user.email
+            email: user.email,
+            role: user.role
         };
 
         const token = await this._jwtService.signAsync(payload);

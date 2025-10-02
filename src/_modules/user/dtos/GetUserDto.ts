@@ -6,6 +6,7 @@ export class GetUserDto {
     name: string;
     email: string;
     status: boolean;
+    role: UserRole;
     createdAt: Date;
     updatedAt: Date;
 
@@ -14,7 +15,10 @@ export class GetUserDto {
         this.name = user.name;
         this.email = user.email;
         this.status = user.status;
+        this.role = user.role;
         this.createdAt = user.createdAt;
         this.updatedAt = user.updatedAt;
     }
 }
+
+export type UserRole = 'USER' | 'MASTER';

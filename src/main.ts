@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerTheme, SwaggerThemeNameEnum } from 'swagger-themes';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 
@@ -17,6 +18,9 @@ async function bootstrap() {
     .setDescription('API documentation for Key Project')
     .setVersion('1.0')
     .build();
+
+  const theme = new SwaggerTheme();
+  const darkTheme = theme.getBuffer(SwaggerThemeNameEnum.DARK);
     
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('swagger', app, document, {
@@ -24,7 +28,8 @@ async function bootstrap() {
       persistAuthorization: true,
       displayRequestDuration: true,
       defaultModelsExpandDepth: -1
-    }
+    },
+    customCss: darkTheme.toString()
   });
 
   await app.listen(process.env.PORT ?? 3000);
